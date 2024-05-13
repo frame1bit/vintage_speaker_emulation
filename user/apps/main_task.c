@@ -722,7 +722,7 @@ void task_spotify_connect(void *arg)
         case TASK_STATE_RUN:
             if ( IsTimeout(&tmrSimWifi))
             {
-                //system_config.wifi_evt = WIFI_EVENT_CONNECTED;
+                system_config.wifi_evt = WIFI_EVENT_CONNECTED;
                 led_indicator_set_in_mode(SYS_MODE_SPOTIFY_CONNECT, &system_config.wifi_evt);
             }
 

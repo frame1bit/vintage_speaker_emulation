@@ -36,8 +36,8 @@ uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *handler)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 
-    potensio.adc_value = HAL_ADC_GetValue(hadc);
-
     HAL_ADC_Start_IT(hadc);
+    potensio.adc_value = HAL_ADC_GetValue(hadc);
+    
 }
 
