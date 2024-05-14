@@ -9,6 +9,7 @@
 #include "led_indicator/led_animation.h"
 #include "led_indicator.h"
 #include "potentiometer/potentiometer.h"
+#include "com_iface.h"
 
 extern void user_led_init(void);
 extern void user_led_run(void);
@@ -162,7 +163,7 @@ static uint8_t get_broadcast_device_connection_status(void)
 #if (CONFIG_BT_CSB_NO_DEVICE_ACK)
     return 0;
 #else
-    return (BTBroadcast.device_connect_status);
+    return (uartcom.device_connect_status);
 #endif
 }
 /**
@@ -236,7 +237,7 @@ static void subtask_bt_broadcast(SystemConfig_t *sc)
                 }
 
                 /** reset data connection status before read from uart comm BT broadcaster*/
-                //BTBroadcast.device_connect_status = 0;      // reset to 0
+                //uartcom.device_connect_status = 0;      // reset to 0
                 reset_broadcast_device_connection_status();
 
 
@@ -701,7 +702,7 @@ void task_bluetooth_a2dp(void *arg)
 void task_spotify_connect(void *arg)
 {
     EventContext *ev = (EventContext *)(arg);
-    static uint32_t adc_value = 0;
+    uint8_t tx_data[10];
 
     do_change_task(&mainTaskState, ev);
 
@@ -728,19 +729,12 @@ void task_spotify_connect(void *arg)
 
             /*** adc using polling */
             if ( IsTimeout(&tmrTestingUart) ) {
-
-                
                 TimeoutSet(&tmrTestingUart, 250);
 
-                // HAL_ADC_Start(&hadc);
-                // HAL_ADC_PollForConversion(&hadc, HAL_MAX_DELAY);//potensio.poll_read(&hadc);
-                // adc_value = HAL_ADC_GetValue(&hadc);
-                // HAL_ADC_Stop(&hadc);
-                //adc_value = potensio.poll_read(potensio.adc_handler);
-                adc_value = potensio.adc_value;
-
-                sprintf(txBuff, "%hu\r\n", adc_value);
-                HAL_UART_Transmit(&huart1, (const uint8_t*)txBuff, strlen(txBuff), HAL_MAX_DELAY);
+                //potensio.adc_value;
+                tx_data[0] = 0x00;
+                tx_data[1] = 0x00;
+                //uart_com_send_data(0x03, 0x0000, tx_data, 2);
                 
             }
             break;
@@ -829,6 +823,8 @@ void main_task_init(void)
 
     led_indicator_init();
 
+    com_iface_init(USART1);
+
 }
 
 void main_task_run(void *arg)
@@ -842,6 +838,8 @@ void main_task_run(void *arg)
     user_led_run();
 
     led_indicator_run(NULL);
+
+    com_iface_polling_data();
 
     /** handler led animation */
     //led_animation_handler(); 

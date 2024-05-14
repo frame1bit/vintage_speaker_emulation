@@ -16,7 +16,7 @@ TIMER timer_user_led;
 #define LED_BLINK_MODE_BLINK_TICK       2
 #define LED_BLINK_MODE_BLINK_PERIODE    3
 
-#define BLINK_MODE  (LED_BLINK_MODE_SYS_CYCLE)
+#define BLINK_MODE  (LED_BLINK_MODE_BLINK_PERIODE + 2)
 
 #if (BLINK_MODE==LED_BLINK_MODE_BLINK_TICK)
 #define MULTIPLIER      (5)
@@ -29,7 +29,7 @@ static uint32_t count_led = 0;
 
 void user_led_init(void)
 {
-    TimeoutSet(&timer_user_led, 500);
+    TimeoutSet(&timer_user_led, 250);
 }
 
 
