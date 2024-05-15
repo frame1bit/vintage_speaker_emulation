@@ -301,6 +301,12 @@ static void task_common(EventContext *ev)
                 system_app_nvm_save_trig();
                 set_vol_display(system_config.system_volume);
 
+                txBuff[0] = system_config.system_volume<<8;
+                txBuff[1] = system_config.system_volume & 0xff;
+
+                /** send command */
+                com_iface_send_data(FUNCTION_CODE_READ, ADDR_REG_VOLUME, txBuff, 2);
+
 
                 if (system_config.blink_periode < 1000) {
                     system_config.blink_periode += 50;
@@ -313,6 +319,12 @@ static void task_common(EventContext *ev)
                 {
                     system_config.system_volume--;
                 }
+
+                txBuff[0] = system_config.system_volume<<8;
+                txBuff[1] = system_config.system_volume & 0xff;
+
+                /** send command */
+                com_iface_send_data(FUNCTION_CODE_READ, ADDR_REG_VOLUME, txBuff, 2);
 
                 if (system_config.blink_periode > 0) {
                     system_config.blink_periode -= 50;
@@ -733,8 +745,9 @@ void task_spotify_connect(void *arg)
 
                 //potensio.adc_value;
                 tx_data[0] = 0x00;
-                tx_data[1] = 0x00;
+                tx_data[1] += 0x01;
                 //uart_com_send_data(0x03, 0x0000, tx_data, 2);
+                //com_iface_send_data(FUNCTION_CODE_READ, ADDR_REG_VOLUME, txBuff, 2);
                 
             }
             break;
