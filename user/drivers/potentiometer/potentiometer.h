@@ -18,16 +18,14 @@ typedef
 struct _potentiometer
 {
     ADC_HandleTypeDef *adc_handler;
-
-    uint32_t (*poll_read)(ADC_HandleTypeDef *handler);
-
-    uint32_t adc_value;     /** adc value from interrupt */
-
+    __uint32_t (*poll_read)(ADC_HandleTypeDef *handler);
+    void (*irq_callback)(__uint32_t value);
+    __uint32_t value[2];
 } Potentiometer_t;
 
 
 /** prototype function */
-uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *hadc);
+__uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *hadc);
 /** end of prototype function */
 
 #endif /** end of POTENTIOMETER */

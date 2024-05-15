@@ -8,7 +8,6 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#include <stdint.h>
 #include "potentiometer.h"
 
 extern Potentiometer_t potensio;
@@ -20,9 +19,9 @@ extern Potentiometer_t potensio;
  * @param   handler    handler for adc channel
  * @return  val     adc value 
 */
-uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *handler)
+__uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *handler)
 {
-    uint32_t val = 0;
+    __uint32_t val = 0;
 
     HAL_ADC_Start(handler);
     HAL_ADC_PollForConversion(handler, HAL_MAX_DELAY);
@@ -35,9 +34,9 @@ uint32_t potentiometer_adc_poll_read(ADC_HandleTypeDef *handler)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-
+    __uint32_t value;
+    value = HAL_ADC_GetValue(hadc);
+    potensio.irq_callback(value);
     HAL_ADC_Start_IT(hadc);
-    potensio.adc_value = HAL_ADC_GetValue(hadc);
-    
 }
 

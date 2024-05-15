@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdint.h>
 #include "main_task.h"
 #include "app_config.h"
 #include "key/key.h"
@@ -13,6 +13,8 @@
 
 extern void user_led_init(void);
 extern void user_led_run(void);
+
+void adc_irq_callback(__uint32_t value);
 
 EventContext msgSend;
 uint8_t mainTaskState = TASK_STATE_IDLE;
@@ -77,7 +79,8 @@ uint8_t txBuff[20];
 
 Potentiometer_t potensio = {
     .adc_handler = &hadc,
-    .poll_read = potentiometer_adc_poll_read
+    .poll_read = potentiometer_adc_poll_read,
+    .irq_callback = adc_irq_callback,
 };
 
 #define SET_ANIMATION_PROPERTY(s, _blink_speed, _bright_static, _color, _center_color, _flag_blink) \
@@ -173,6 +176,17 @@ static uint8_t get_broadcast_device_connection_status(void)
 static void reset_broadcast_device_connection_status(void)
 {
 
+}
+
+
+void adc_irq_callback(__uint32_t value)
+{
+    static __uint16_t i = 0;
+
+    if (++i > 1000) {
+        i = 0;
+        potensio.value[0] = value;
+    }
 }
 
 /**
@@ -276,6 +290,7 @@ static void task_common(EventContext *ev)
 {
     static uint8_t tx_data = 0;
     static uint16_t temp = 0;
+    static uint8_t __data[2];
 
     if (ev->eventId != MSG_NONE)
     {
@@ -399,6 +414,13 @@ static void task_common(EventContext *ev)
     system_app_nvm_saving_process();
 
     subtask_bt_broadcast(&system_config);
+
+    if (potensio.value[0] != potensio.value[1]) {
+        __data[0] = (uint8_t)(potensio.value[0] >> 8);
+        __data[1] = (uint8_t)(potensio.value[0] & 0xff);
+        com_iface_send_data(FUNCTION_CODE_READ, ADDR_REG_ADC1_VALUE, (uint8_t*)__data, 2);
+        potensio.value[1] = potensio.value[0];
+    }
 
 
     if ( GET_FLAG( FLAG_FS_FACTORY_RESET_START ) )

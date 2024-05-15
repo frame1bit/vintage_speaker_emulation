@@ -16,7 +16,7 @@ TIMER timer_user_led;
 #define LED_BLINK_MODE_BLINK_TICK       2
 #define LED_BLINK_MODE_BLINK_PERIODE    3
 
-#define BLINK_MODE  (LED_BLINK_MODE_BLINK_PERIODE + 2)
+#define BLINK_MODE  (LED_BLINK_MODE_BLINK_PERIODE)
 
 #if (BLINK_MODE==LED_BLINK_MODE_BLINK_TICK)
 #define MULTIPLIER      (5)
@@ -40,7 +40,7 @@ void user_led_run(void)
     if (IsTimeout(&timer_user_led) ) {
         // toggle led on PA0
         HAL_GPIO_TogglePin(USER_LED_PORT, USER_LED_PIN);
-        TimeoutSet(&timer_user_led, system_config.blink_periode);
+        TimeoutSet(&timer_user_led, 250);
     }
 #elif (BLINK_MODE==LED_BLINK_MODE_BLINK_TICK)
     if (count_led < T_ON) {

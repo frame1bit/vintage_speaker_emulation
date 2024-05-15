@@ -42,7 +42,7 @@ CodeKeyType rotary_key_scan(void)
     {
         return CodeKey;
     }
-    TimeoutSet(&CodingKeyScanTimer, CodingKeyScanTimeSet);
+    TimeoutSet(&CodingKeyScanTimer, 50);
 
     if (ClockWiseCnt > 1)
     {
