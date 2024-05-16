@@ -764,12 +764,6 @@ void task_spotify_connect(void *arg)
             /*** adc using polling */
             if ( IsTimeout(&tmrTestingUart) ) {
                 TimeoutSet(&tmrTestingUart, 250);
-
-                //potensio.adc_value;
-                tx_data[0] = 0x00;
-                tx_data[1] += 0x01;
-                //uart_com_send_data(0x03, 0x0000, tx_data, 2);
-                //com_iface_send_data(FUNCTION_CODE_READ, ADDR_REG_VOLUME, txBuff, 2);
                 
             }
             break;

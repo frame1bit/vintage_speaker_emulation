@@ -6,11 +6,13 @@ static uint8_t ClockWiseCnt;
 static uint8_t CounterClockWiseCnt;
 uint8_t CodingKeyInt;
 
+uint32_t rotary_val[2];
+
 TIMER CodingKeyScanTimer;
 
 #define	ROTARY_TIMER	htim1
 
- #if (CONFIG_ROTARY_ENCODER_ENABLE)
+
  void rotary_key_callback()
  {
 
@@ -18,8 +20,6 @@ TIMER CodingKeyScanTimer;
 	//rotary_key_scan_poll();
 
  }
- #endif
-
 
 
 /**
@@ -27,23 +27,42 @@ TIMER CodingKeyScanTimer;
  */
 void rotary_key_init(void)
 {
+
+#if (CONFIG_ROTARY_USING_TIMER)
+   HAL_TIM_Encoder_Start(&ROTARY_TIMER, TIM_CHANNEL_ALL);
+#else
     ClockWiseCnt = 0;
     CounterClockWiseCnt = 0;
     CodingKeyInt = 0;
-
-    HAL_TIM_Base_Start_IT(&ROTARY_TIMER);
+#endif
+    
 }
 
 CodeKeyType rotary_key_scan(void)
 {
+
     CodeKeyType CodeKey = CODE_KEY_NONE;
 
     if (!IsTimeout(&CodingKeyScanTimer))
     {
         return CodeKey;
     }
-    TimeoutSet(&CodingKeyScanTimer, 50);
+    TimeoutSet(&CodingKeyScanTimer, 100);
 
+#if (CONFIG_ROTARY_USING_TIMER)
+    rotary_val[0] = __HAL_TIM_GET_COUNTER(&htim1)>>2;
+
+    if (rotary_val[0] > rotary_val[1]) 
+    {
+        CodeKey = CODE_KEY_FORWARD;
+    }
+    else if (rotary_val[0] < rotary_val[1]) 
+    {
+        CodeKey = CODE_KEY_BACKWARD;
+    }
+    rotary_val[1] = rotary_val[0];
+
+#else
     if (ClockWiseCnt > 1)
     {
         CodeKey = CODE_KEY_FORWARD;
@@ -56,7 +75,10 @@ CodeKeyType rotary_key_scan(void)
     ClockWiseCnt = 0;
     CounterClockWiseCnt = 0;
 
+#endif
+
     return CodeKey;
+
 }
 
 /**
@@ -64,6 +86,11 @@ CodeKeyType rotary_key_scan(void)
 */
 void rotary_key_scan_poll(void)
 {
+
+#if (CONFIG_ROTARY_USING_TIMER)
+
+#else
+
     if (CodingKeyInt == 0)
     {
         if ((HAL_GPIO_ReadPin(ROT_A_GPIO_Port, ROT_A_Pin)) && !(HAL_GPIO_ReadPin(ROT_B_GPIO_Port, ROT_B_Pin)))
@@ -89,14 +116,8 @@ void rotary_key_scan_poll(void)
             CodingKeyInt = 0;
         }
     }
+
+#endif
+
 }
 
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim == &ROTARY_TIMER)
-	{
-		/** polling rotary key */
-		rotary_key_scan_poll();
-	}
-}

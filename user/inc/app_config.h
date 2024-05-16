@@ -129,6 +129,7 @@
 #define CONFIG_ROTARY_ENCODER_ENABLE        (1)
 #if (CONFIG_ROTARY_ENCODER_ENABLE)
 #define CONFIG_ROTARY_SWITCH                (1)
+#define CONFIG_ROTARY_USING_TIMER           (1)
 #endif
 
 /***
